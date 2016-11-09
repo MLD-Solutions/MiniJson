@@ -49,14 +49,17 @@ namespace MiniJson
             }
             else if (str.Substring(idx, 4) == "null")
             {
+                idx += 4;
                 return null;
             }
             else if (str.Substring(idx, 4) == "true")
             {
+                idx += 4;
                 return true;
             }
             else if (str.Substring(idx, 5) == "false")
             {
+                idx += 5;
                 return false;
             }
             else
