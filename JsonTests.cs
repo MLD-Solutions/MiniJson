@@ -31,7 +31,7 @@ namespace UnitTests
         public void TestParseArray()
         {
             Assert.AreEqual(0, ((List<object>)Json.Parse("[]")).Count);
-            Assert.IsTrue(new List<object> { 1.0, 2.0, 3.0 }.SequenceEqual((List<object>)Json.Parse("[1 , 2,3]")));
+            Assert.IsTrue(new List<object> { 1.0, true, 3.0 }.SequenceEqual((List<object>)Json.Parse("[1 , true,3]")));
         }
 
         [TestMethod]
