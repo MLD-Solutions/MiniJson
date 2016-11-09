@@ -282,17 +282,25 @@ namespace MiniJson
 
         private static string StringifyString(string str)
         {
-            return string.Concat(new [] {"\""}.Concat(str.Select(c =>
-                c == '"' ? "\\\"" :
-                c == '\\' ? "\\\\" :
-                c == '\n' ? "\\n" :
-                c == '\b' ? "\\b" :
-                c == '\f' ? "\\f" :
-                c == '\r' ? "\\r" :
-                c == '\t' ? "\\t" :
-                c < 32 ? ((int)c).ToString("X4") :
-                c.ToString()
-            )).Concat(new [] { "\"" }));
+            var sb = new StringBuilder("\"", str.Length + 2);
+            foreach (var c in str)
+            {
+                var substr = c == '"' ? "\\\"" :
+                    c == '\\' ? "\\\\" :
+                    c == '\n' ? "\\n" :
+                    c == '\b' ? "\\b" :
+                    c == '\f' ? "\\f" :
+                    c == '\r' ? "\\r" :
+                    c == '\t' ? "\\t" :
+                    c < ' ' ? ((int)c).ToString("X4") : null;
+                if (substr != null) {
+                    sb.Append(substr);
+                }
+                else {
+                    sb.Append(c);
+                }
+            }
+            return sb.Append('"').ToString();
         }
 
         public static object Parse(string json)
