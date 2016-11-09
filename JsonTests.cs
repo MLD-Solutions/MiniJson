@@ -12,7 +12,7 @@ namespace UnitTests
         [TestMethod]
         public void TestParseString()
         {
-            Assert.AreEqual("asdf\ubeef\r\n", Json.Parse("\"asdf\\ubeef\\r\\n\""));
+            Assert.AreEqual("asdf\ubeef\u0005\r\n", Json.Parse("\"asdf\\ubeef\\u0005\\r\\n\""));
             Assert.AreEqual("\"", Json.Parse("\"\\\"\" "));
             Assert.AreEqual("", Json.Parse("\"\""));
         }
@@ -62,8 +62,9 @@ namespace UnitTests
         [TestMethod]
         public void TestStringifyString()
         {
-            Assert.AreEqual("\"asdf\\r\\n\"", Json.Stringify("asdf\r\n"));
             Assert.AreEqual("\"\\\"\"", Json.Stringify("\""));
+            Assert.AreEqual("\"asdf\\r\\n\"", Json.Stringify("asdf\r\n"));
+            Assert.AreEqual("\"\\u0005\"", Json.Stringify("\u0005"));
         }
 
         private void AssertStringifyFails(object obj)
