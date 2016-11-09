@@ -295,7 +295,7 @@ namespace MiniJson
                     c == '\f' ? "\\f" :
                     c == '\r' ? "\\r" :
                     c == '\t' ? "\\t" :
-                    c < ' ' ? ((int)c).ToString("X4") : null;
+                    c < ' ' ? "\\u" + ((int)c).ToString("X4") : null;
                 if (substr != null) {
                     sb.Append(substr);
                 }
