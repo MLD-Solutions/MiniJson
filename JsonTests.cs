@@ -25,6 +25,7 @@ namespace UnitTests
             Assert.AreEqual(0.001, (double)Json.Parse("  1e-3"));
             Assert.AreEqual(1000.0, (double)Json.Parse("1e+3 "));
             Assert.AreEqual(1000.0, (double)Json.Parse("1e3"));
+            Assert.AreEqual(0.0, (double)Json.Parse("0"));
         }
 
         [TestMethod]
@@ -40,10 +41,10 @@ namespace UnitTests
             Assert.AreEqual(0, ((Dictionary<string, object>)Json.Parse("{}")).Count);
             var target = new Dictionary<string, object>
             {
-                {"asdf", 4.0},
+                {"asdf", 0.0},
                 {"qwer", "ooo"},
             };
-            var result = (Dictionary<string, object>)Json.Parse("{\"asdf\":  4,\t\"qwer\"\t\t:\"ooo\"}");
+            var result = (Dictionary<string, object>)Json.Parse("{\"asdf\":  0,\t\"qwer\"\t\t:\"ooo\"}");
             Assert.AreEqual(target.Count, result.Count);
             foreach (var kv in target)
             {
