@@ -218,11 +218,11 @@ namespace MiniJson
             }
             if (ch == '0')
             {
-                if (str[idx + 1] != '.')
-                {
-                    throw new FormatException("0 not followed by a '.'");
-                }
                 idx += 1;
+                if (idx == str.Length || str[idx] != '.')
+                {
+                    return 0;
+                }
                 ch = '.';
             }
             else if (ch >= '1' && ch <= '9')
