@@ -29,7 +29,8 @@ namespace MiniJson
         {
             idx = skipWhitespace(str, idx);
             var ch = str[idx];
-            if (ch == '{') {
+            if (ch == '{')
+            {
                 idx += 1;
                 return ParseObject(str, ref idx);
             }
@@ -90,7 +91,7 @@ namespace MiniJson
                 {
                     throw new FormatException("Object expected ':' @ " + idx);
                 }
-                idx = skipWhitespace(str, idx+1);
+                idx = skipWhitespace(str, idx + 1);
                 var val = ParseValue(str, ref idx);
                 ret[key] = val;
                 idx = skipWhitespace(str, idx);
@@ -125,7 +126,7 @@ namespace MiniJson
                 idx = skipWhitespace(str, idx);
                 if (str[idx] == ',')
                 {
-                    idx = skipWhitespace(str, idx+1);
+                    idx = skipWhitespace(str, idx + 1);
                 }
                 else if (str[idx] != ']')
                 {
@@ -167,7 +168,7 @@ namespace MiniJson
                 var ch = str[idx];
                 if (ch == '\\')
                 {
-                    var c2 = str[idx+1];
+                    var c2 = str[idx + 1];
                     if (c2 == '"' || c2 == '/' || c2 == '\\') sb.Append(c2);
                     else if (c2 == 'n') sb.Append('\n');
                     else if (c2 == 't') sb.Append('\t');
@@ -177,10 +178,11 @@ namespace MiniJson
                     else
                     {
                         var hex4 = str.Substring(idx + 1, 4);
-                        if (hex4.Length != 4){
+                        if (hex4.Length != 4)
+                        {
                             throw new FormatException("Unicode escape not length 4");
                         }
-                        var code = chr2hexval(str[idx+2])<<12 | chr2hexval(str[idx+3])<<8 | chr2hexval(str[idx+4])<<4 | chr2hexval(str[idx+5]);
+                        var code = chr2hexval(str[idx + 2]) << 12 | chr2hexval(str[idx + 3]) << 8 | chr2hexval(str[idx + 4]) << 4 | chr2hexval(str[idx + 5]);
                         if (code < 0 || code > 0xffff)
                         {
                             throw new FormatException("Invalid hexadecimal character");
@@ -227,13 +229,16 @@ namespace MiniJson
             }
             else if (ch >= '1' && ch <= '9')
             {
-                do {
+                do
+                {
                     result = result * 10 + (ch - '0');
                     idx += 1;
                     if (idx == str.Length) return neg ? -result : result;
                     ch = str[idx];
                 } while (ch >= '0' && ch <= '9');
-            } else {
+            }
+            else
+            {
                 throw new FormatException("Expected digit @ " + idx);
             }
             if (ch == '.')
@@ -258,11 +263,13 @@ namespace MiniJson
             {
                 idx += 1;
                 ch = str[idx];
-                if ((ch < '0' || ch > '9') && ch != '+' && ch != '-') {
+                if ((ch < '0' || ch > '9') && ch != '+' && ch != '-')
+                {
                     throw new FormatException("Exponential not followed by digits or + or -");
                 }
                 var expneg = ch == '-';
-                if (ch == '-' || ch == '+') {
+                if (ch == '-' || ch == '+')
+                {
                     idx += 1;
                     ch = str[idx];
                     if (ch < '0' || ch > '9')
@@ -283,9 +290,10 @@ namespace MiniJson
             return neg ? -result : result;
         }
 
-        private static string StringifyString(string str)
+        private static StringBuilder StringifyString(string str, StringBuilder sb)
         {
-            var sb = new StringBuilder("\"", str.Length + 2);
+            sb.EnsureCapacity(sb.Length + str.Length + 2);
+            sb.Append('"');
             foreach (var c in str)
             {
                 var substr = c == '"' ? "\\\"" :
@@ -296,14 +304,16 @@ namespace MiniJson
                     c == '\r' ? "\\r" :
                     c == '\t' ? "\\t" :
                     c < ' ' ? "\\u" + ((int)c).ToString("X4") : null;
-                if (substr != null) {
+                if (substr != null)
+                {
                     sb.Append(substr);
                 }
-                else {
+                else
+                {
                     sb.Append(c);
                 }
             }
-            return sb.Append('"').ToString();
+            return sb.Append('"');
         }
 
         public static object Parse(string json)
@@ -319,36 +329,72 @@ namespace MiniJson
             }
         }
 
-        public static string Stringify(object obj)
+        private static StringBuilder Stringify(object obj, StringBuilder sb)
         {
-            if (obj == null) return "null";
+            if (obj == null) return sb.Append("null");
             var oty = obj.GetType();
             if (oty == typeof(string))
             {
-                return StringifyString((string)obj);
+                return StringifyString((string)obj, sb);
             }
             if (oty == typeof(double))
             {
                 var val = (double)obj;
-                if (!double.IsNaN(val) && !double.IsInfinity(val)) {
-                    return val.ToString();
+                if (!double.IsNaN(val) && !double.IsInfinity(val))
+                {
+                    return sb.Append(val.ToString());
                 }
             }
             if (oty == typeof(bool))
             {
-                return (bool)obj ? "true" : "false";
+                return sb.Append((bool)obj ? "true" : "false");
             }
             if (oty == typeof(List<object>))
             {
-                return "[" + string.Join(",", ((List<object>)obj).Select(Stringify)) + "]";
+                var list = (List<object>)obj;
+                if (list.Count == 0)
+                {
+                    return sb.Append("[]");
+                }
+                else
+                {
+                    sb.Append('[');
+                    foreach (var listobj in list)
+                    {
+                        Stringify(listobj, sb);
+                        sb.Append(',');
+                    }
+                    sb[sb.Length - 1] = ']';
+                    return sb;
+                }
             }
             if (oty == typeof(Dictionary<string, object>))
             {
-                return "{" + string.Join(",", ((Dictionary<string, object>)obj).Select(kv => {
-                    return StringifyString(kv.Key) + ":" + Stringify(kv.Value);
-                })) + "}";
+                var dict = (Dictionary<string, object>)obj;
+                if (dict.Count == 0)
+                {
+                    return sb.Append("{}");
+                }
+                else
+                {
+                    sb.Append('{');
+                    foreach (var kv in dict)
+                    {
+                        StringifyString(kv.Key, sb);
+                        sb.Append(':');
+                        Stringify(kv.Value, sb);
+                        sb.Append(',');
+                    }
+                    sb[sb.Length - 1] = '}';
+                    return sb;
+                }
             }
             throw new ArgumentException("Object not JSON convertible");
+        }
+
+        public static string Stringify(object obj)
+        {
+            return Stringify(obj, new StringBuilder()).ToString();
         }
     }
 }
